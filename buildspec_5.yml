@@ -1,0 +1,30 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: 3.x
+  pre_build:
+    commands:
+      - echo Checking for specific folders and files...
+      - |
+        # Fetch the latest commit history to get the changes
+        git fetch origin
+        git diff --name-only HEAD~1 HEAD > changed_files.txt
+        CHANGED_FILES=$(cat changed_files.txt)
+        echo "Changed files: $CHANGED_FILES"
+
+        # Check if the specific folder or file exists in the changed files
+        if echo "$CHANGED_FILES" | grep -qE "^(specific_folder/|specific_file$)"; then
+          echo "Required folder or file changes detected, continuing..."
+        else
+          echo "No required folder or file changes detected, exiting..."
+          exit 1
+  build:
+    commands:
+      - echo Building the Python package...
+      - zip -r build_output.zip .
+artifacts:
+  files:
+    - build_output.zip
+  discard-paths: yes
+
