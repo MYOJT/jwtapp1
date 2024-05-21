@@ -6,7 +6,7 @@
     <title>File Upload</title>
 </head>
 <body>
-    <form id="uploadForm">
+    <form id="uploadForm" enctype="multipart/form-data">
         <input type="file" id="fileInput" name="file" required>
         <button type="submit">Upload File</button>
     </form>
@@ -14,30 +14,28 @@
     <script>
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const file = document.getElementById('fileInput').files[0];
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function() {
-                    const base64String = reader.result.split(',')[1];
-                    fetch('https://<api-id>.execute-api.<region>.amazonaws.com/<stage>/upload', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            fileName: file.name,
-                            fileContent: base64String
-                        })
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                const base64String = reader.result.split(',')[1];
+                fetch('https://<api-id>.execute-api.<region>.amazonaws.com/prod/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fileName: file.name,
+                        fileContent: base64String
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(data.message ? "File uploaded successfully" : "File upload failed");
-                    })
-                    .catch(error => console.error('Error:', error));
-                };
-                reader.readAsDataURL(file);
-            }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message ? "File uploaded successfully" : "File upload failed");
+                })
+                .catch(error => console.error('Error:', error));
+            };
+            reader.readAsDataURL(file);
         });
     </script>
 </body>
